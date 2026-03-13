@@ -1,6 +1,10 @@
 // controllers/categoryController.js
+const mongoose = require("mongoose");
 const Category = require("../models/Category");
 
+/**
+ * Return integer in [0, max)
+ */
 function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
@@ -9,7 +13,7 @@ exports.createCategory = async (req, res) => {
   try {
     const { name, description } = req.body;
 
-    if (!name) {
+    if (!name || String(name).trim() === "") {
       return res.status(400).json({
         success: false,
         message: "Name is required",
@@ -17,11 +21,11 @@ exports.createCategory = async (req, res) => {
     }
 
     const categoryDetails = await Category.create({
-      name,
-      description,
+      name: name.trim(),
+      description: description ? String(description).trim() : undefined,
     });
 
-    console.log("Created category:", categoryDetails);
+    console.log("Created category:", categoryDetails._id);
 
     return res.status(201).json({
       success: true,
@@ -41,7 +45,8 @@ exports.createCategory = async (req, res) => {
 exports.showAllCategories = async (req, res) => {
   try {
     console.log("INSIDE SHOW ALL CATEGORIES");
-    const allCategories = await Category.find({});
+    // using lean() for a lightweight plain JS object (faster & less mem)
+    const allCategories = await Category.find({}).select("name description").lean().exec();
     return res.status(200).json({
       success: true,
       data: allCategories,
@@ -60,7 +65,6 @@ exports.showAllCategories = async (req, res) => {
 exports.categoryPageDetails = async (req, res) => {
   try {
     const { categoryId } = req.body;
-    console.log("PRINTING CATEGORY ID:", categoryId);
 
     if (!categoryId) {
       return res.status(400).json({
@@ -69,16 +73,49 @@ exports.categoryPageDetails = async (req, res) => {
       });
     }
 
-    // find selected category and populate its published courses + their ratingAndReviews
-    const selectedCategory = await Category.findById(categoryId)
+    if (!mongoose.isValidObjectId(categoryId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid categoryId",
+      });
+    }
+
+    // Fetch selected category and its published courses + ratingAndReviews
+    // Use lean() for performance; populate only needed fields
+    const selectedCategoryPromise = Category.findById(categoryId)
+      .select("name description courses")
       .populate({
         path: "courses",
         match: { status: "Published" },
-        populate: "ratingAndReviews",
+        select: "title sold price instructor ratingAndReviews status createdAt",
+        populate: {
+          path: "ratingAndReviews",
+          select: "rating review user createdAt",
+        },
       })
+      .lean()
       .exec();
 
-    console.log("SELECTED CATEGORY:", selectedCategory);
+    // Count other categories (for random selection) and fetch top-selling across all categories in parallel
+    const countOtherCategoriesPromise = Category.countDocuments({ _id: { $ne: categoryId } }).exec();
+
+    // We'll fetch all categories with their published courses (only necessary fields)
+    const allCategoriesPromise = Category.find()
+      .select("courses")
+      .populate({
+        path: "courses",
+        match: { status: "Published" },
+        select: "title sold price instructor",
+        populate: { path: "instructor", select: "name _id" },
+      })
+      .lean()
+      .exec();
+
+    const [selectedCategory, otherCount, allCategories] = await Promise.all([
+      selectedCategoryPromise,
+      countOtherCategoriesPromise,
+      allCategoriesPromise,
+    ]);
 
     if (!selectedCategory) {
       return res.status(404).json({
@@ -87,49 +124,52 @@ exports.categoryPageDetails = async (req, res) => {
       });
     }
 
-    const selectedCourses = Array.isArray(selectedCategory.courses)
-      ? selectedCategory.courses
-      : [];
+    // Make sure courses is an array
+    const selectedCourses = Array.isArray(selectedCategory.courses) ? selectedCategory.courses : [];
 
     if (selectedCourses.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "No published courses found for the selected category",
+      // It's okay to return 200 with empty course list - but if your API expects 404, change this.
+      return res.status(200).json({
+        success: true,
+        data: {
+          selectedCategory,
+          differentCategory: null,
+          mostSellingCourses: [],
+          note: "No published courses found for the selected category",
+        },
       });
     }
 
-    // Get a different random category (if any)
-    const categoriesExceptSelected = await Category.find({
-      _id: { $ne: categoryId },
-    }).exec();
-
+    // Pick a random different category (if any)
     let differentCategory = null;
-    if (Array.isArray(categoriesExceptSelected) && categoriesExceptSelected.length > 0) {
-      const randomIndex = getRandomInt(categoriesExceptSelected.length);
-      const randomCategoryId = categoriesExceptSelected[randomIndex]._id;
-
-      differentCategory = await Category.findById(randomCategoryId)
+    if (otherCount > 0) {
+      // pick random index within otherCount then findOne with skip
+      const randomIndex = getRandomInt(otherCount);
+      // find one category excluding selected with skip(randomIndex)
+      // populate its published courses (lightweight)
+      differentCategory = await Category.findOne({ _id: { $ne: categoryId } })
+        .select("name description courses")
         .populate({
           path: "courses",
           match: { status: "Published" },
+          select: "title sold price instructor",
+          populate: { path: "instructor", select: "name _id" },
         })
+        .skip(randomIndex)
+        .lean()
         .exec();
     } else {
       console.log("No other categories available to select a differentCategory.");
     }
 
-    // Get top-selling courses across all categories
-    const allCategories = await Category.find()
-      .populate({
-        path: "courses",
-        match: { status: "Published" },
-        populate: { path: "instructor" },
-      })
-      .exec();
-
-    const allCourses = allCategories.flatMap((c) => Array.isArray(c.courses) ? c.courses : []);
+    // Flatten all published courses from all categories and compute top sellers
+    const allCourses = allCategories.flatMap((c) => (Array.isArray(c.courses) ? c.courses : []));
     const mostSellingCourses = allCourses
-      .sort((a, b) => (b.sold || 0) - (a.sold || 0))
+      .map((course) => ({
+        ...course,
+        sold: Number(course.sold || 0),
+      }))
+      .sort((a, b) => b.sold - a.sold)
       .slice(0, 10);
 
     return res.status(200).json({
