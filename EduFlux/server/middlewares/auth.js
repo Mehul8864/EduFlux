@@ -2,101 +2,101 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const User = require("../models/User");
 
-//auth
+// Verify and attach user to req.user
 exports.auth = async (req, res, next) => {
-    try{
-        //extract token
-        const token = req.cookies.token 
-                        || req.body.token 
-                        || req.header("Authorization").replace("Bearer ", "");
+  try {
+    const authHeader = req.header("Authorization") || "";
+    const tokenFromHeader = authHeader.startsWith("Bearer ")
+      ? authHeader.slice(7)
+      : authHeader || null;
 
-        //if token missing, then return response
-        if(!token) {
-            return res.status(401).json({
-                success:false,
-                message:'Token is missing',
-            });
-        }
+    const token =
+      (req.cookies && req.cookies.token) ||
+      req.body?.token ||
+      tokenFromHeader ||
+      null;
 
-        //verify the token
-        try{
-            const decode =  jwt.verify(token, process.env.JWT_SECRET);
-            console.log(decode);
-            req.user = decode;
-        }
-        catch(err) {
-            //verification - issue
-            return res.status(401).json({
-                success:false,
-                message:'token is invalid',
-            });
-        }
-        next();
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Token is missing. Please provide a valid token.",
+      });
     }
-    catch(error) {  
-        return res.status(401).json({
-            success:false,
-            message:'Something went wrong while validating the token',
-        });
-    }
-}
 
-//isStudent
-exports.isStudent = async (req, res, next) => {
- try{
-        if(req.user.accountType !== "Student") {
-            return res.status(401).json({
-                success:false,
-                message:'This is a protected route for Students only',
-            });
-        }
-        next();
- }
- catch(error) {
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET is not configured in environment.");
+      return res.status(500).json({
+        success: false,
+        message: "Server configuration error.",
+      });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({
+        success: false,
+        message: "Token is invalid or expired.",
+      });
+    }
+
+    // If your token payload uses a different key (e.g. userId), adjust below
+    const userId = decoded.id || decoded._id || decoded.userId;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Token payload invalid: user id not found.",
+      });
+    }
+
+    const user = await User.findById(userId).select("-password");
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "User not found for provided token.",
+      });
+    }
+
+    // attach the full user document (without password) for downstream use
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error("Auth middleware error:", error);
     return res.status(500).json({
-        success:false,
-        message:'User role cannot be verified, please try again'
-    })
- }
-}
+      success: false,
+      message: "Something went wrong while validating the token.",
+    });
+  }
+};
 
+// Role-authorizer factory to avoid repeated code
+const authorize = (requiredRole) => (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Not authenticated. Please login and try again.",
+      });
+    }
 
-//isInstructor
-exports.isInstructor = async (req, res, next) => {
-    try{
-           if(req.user.accountType !== "Instructor") {
-               return res.status(401).json({
-                   success:false,
-                   message:'This is a protected route for Instructor only',
-               });
-           }
-           next();
+    if (req.user.accountType !== requiredRole) {
+      return res.status(403).json({
+        success: false,
+        message: `Access denied. This route is for ${requiredRole} only.`,
+      });
     }
-    catch(error) {
-       return res.status(500).json({
-           success:false,
-           message:'User role cannot be verified, please try again'
-       })
-    }
-   }
 
+    next();
+  } catch (error) {
+    console.error("Authorize middleware error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "User role cannot be verified, please try again.",
+    });
+  }
+};
 
-//isAdmin
-exports.isAdmin = async (req, res, next) => {
-    try{
-           if(req.user.accountType !== "Admin") {
-               return res.status(401).json({
-                   success:false,
-                   message:'This is a protected route for Admin only',
-               });
-           }
-           next();
-    }
-    catch(error) {
-       return res.status(500).json({
-           success:false,
-           message:'User role cannot be verified, please try again'
-       })
-    }
-   }
-   
+exports.isStudent = authorize("Student");
+exports.isInstructor = authorize("Instructor");
+exports.isAdmin = authorize("Admin");
