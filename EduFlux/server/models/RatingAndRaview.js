@@ -57,7 +57,7 @@ ratingAndReviewSchema.statics.calculateAverageRating = async function (courseId)
   const mongooseModel = this;
 
   const obj = await mongooseModel.aggregate([
-    { $match: { course: mongoose.Types.ObjectId(courseId) } },
+    { $match: { course: new mongoose.Types.ObjectId(courseId) } },
     {
       $group: {
         _id: "$course",

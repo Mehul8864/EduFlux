@@ -247,4 +247,26 @@ router.get("/courses/:courseId/ratings/average", [param("courseId").exists()], r
 // Get all reviews for a course
 router.get("/courses/:courseId/reviews", [param("courseId").exists()], runValidation, getAllRating);
 
+/* =========================================================================
+   Legacy flat-route aliases (frontend compatibility)
+   ========================================================================= */
+router.get("/getAllCourses", getAllCourses);
+router.post("/getCourseDetails", getCourseDetails);
+router.post("/getFullCourseDetails", auth, getFullCourseDetails);
+router.post("/createCourse", auth, isInstructor, createCourse);
+router.put("/editCourse", auth, isInstructor, editCourse);
+router.delete("/deleteCourse", auth, isInstructorOrAdmin, deleteCourse);
+router.get("/getInstructorCourses", auth, isInstructor, getInstructorCourses);
+router.post("/addSection", auth, isInstructor, createSection);
+router.put("/updateSection", auth, isInstructor, updateSection);
+router.delete("/deleteSection", auth, isInstructor, deleteSection);
+router.post("/addSubSection", auth, isInstructor, createSubSection);
+router.put("/updateSubSection", auth, isInstructor, updateSubSection);
+router.delete("/deleteSubSection", auth, isInstructor, deleteSubSection);
+router.get("/showAllCategories", showAllCategories);
+router.post("/getCategoryPageDetails", categoryPageDetails);
+router.post("/createRating", auth, isStudent, createRating);
+router.get("/getReviews", getAllRating);
+router.post("/updateCourseProgress", auth, isStudent, updateCourseProgress);
+
 module.exports = router;

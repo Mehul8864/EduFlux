@@ -74,7 +74,7 @@ exports.capturePayment = async (req, res) => {
         console.log(error);
         return res
             .status(500)
-            .json({ success: false, mesage: "Could not Initiate Order" });
+            .json({ success: false, message: "Could not Initiate Order" });
     }
 };
 
@@ -160,9 +160,9 @@ const enrollStudents = async (courses, userId, res) => {
                 { new: true }
             );
 
-            ///bachhe ko mail send kardo
+            ///send enrollment confirmation email
             const emailResponse = await mailSender(
-                enrollStudents.email,
+                enrolledStudent.email,
                 `Successfully Enrolled into ${enrolledCourse.courseName}`,
                 courseEnrollmentEmail(
                     enrolledCourse.courseName,

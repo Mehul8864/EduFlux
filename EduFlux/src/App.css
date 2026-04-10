@@ -230,3 +230,147 @@ body {
 .opacity_layer_bg {
   background: linear-gradient(180deg, rgba(4, 21, 45, 0) 0%, #04152d 79.17%);
 }
+
+/* ===== Animated gradient text ===== */
+.animated-gradient-text {
+  background: linear-gradient(270deg, #1FA2FF, #12D8FA, #A6FFCB, #FFD60A, #1FA2FF);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradientShift 6s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ===== Glow button ===== */
+.glow-btn {
+  position: relative;
+  overflow: hidden;
+}
+.glow-btn::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(90deg, #1FA2FF, #12D8FA, #A6FFCB, #FFD60A);
+  background-size: 300%;
+  border-radius: inherit;
+  z-index: -1;
+  animation: glowRotate 3s linear infinite;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.glow-btn:hover::after {
+  opacity: 1;
+}
+@keyframes glowRotate {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+/* ===== Card hover lift ===== */
+.card-hover {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* ===== Floating animation ===== */
+.float-anim {
+  animation: float 4s ease-in-out infinite;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* ===== Glassmorphism card ===== */
+.glass-card {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  transition: background 0.3s, border-color 0.3s, transform 0.25s;
+}
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 214, 10, 0.25);
+  transform: translateY(-3px);
+}
+
+/* ===== Stats counter card ===== */
+.stat-card {
+  background: linear-gradient(135deg, rgba(31, 162, 255, 0.08), rgba(166, 255, 203, 0.05));
+  border: 1px solid rgba(31, 162, 255, 0.15);
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: transform 0.25s, border-color 0.25s;
+}
+.stat-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(31, 162, 255, 0.4);
+}
+
+/* ===== Pulse dot (online indicator) ===== */
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #06D6A0;
+  box-shadow: 0 0 0 0 rgba(6, 214, 160, 0.4);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(6, 214, 160, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(6, 214, 160, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(6, 214, 160, 0); }
+}
+
+/* ===== Badge ===== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+.badge-yellow {
+  background: rgba(255, 214, 10, 0.15);
+  color: #FFD60A;
+  border: 1px solid rgba(255, 214, 10, 0.3);
+}
+.badge-green {
+  background: rgba(6, 214, 160, 0.12);
+  color: #06D6A0;
+  border: 1px solid rgba(6, 214, 160, 0.25);
+}
+.badge-blue {
+  background: rgba(31, 162, 255, 0.12);
+  color: #1FA2FF;
+  border: 1px solid rgba(31, 162, 255, 0.25);
+}
+
+/* ===== Improved form focus ===== */
+.form-style {
+  @apply rounded-lg bg-richblack-700 p-3 text-[16px] leading-[24px] text-richblack-5 shadow-[0_1px_0_0] shadow-white/30 placeholder:text-richblack-400 focus:outline-none focus:ring-2 focus:ring-yellow-50/40 transition-all duration-200;
+}
+
+/* ===== Improved buttons ===== */
+.yellowButton {
+  @apply cursor-pointer rounded-md bg-yellow-50 px-[20px] py-[8px] font-semibold text-richblack-900 hover:bg-yellow-25 hover:scale-95 duration-200 transition-all;
+}
+
+.blackButton {
+  @apply cursor-pointer rounded-md bg-richblack-800 px-[20px] py-[8px] font-semibold text-richblack-5 hover:bg-richblack-700 hover:scale-95 duration-200 transition-all;
+}

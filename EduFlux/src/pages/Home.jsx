@@ -82,12 +82,13 @@ const Home = () => {
                     <Link to={"/signup"}>
                         <div
                             className="z-0 group p-1 mx-auto rounded-full bg-richblack-800 font-bold text-richblack-200
-                                        transition-all duration-200 hover:scale-95 w-fit"
+                                        transition-all duration-200 hover:scale-95 w-fit border border-richblack-700 hover:border-yellow-50/30"
                         >
                             <div
                                 className="flex flex-row items-center gap-2 rounded-full px-10 py-[5px]
                               transition-all duration-200 group-hover:bg-richblack-900"
                             >
+                                <span className="pulse-dot"></span>
                                 <p>Become an Instructor</p>
                                 <FaArrowRight />
                             </div>
@@ -241,6 +242,28 @@ const Home = () => {
                 {/*Section 3 */}
                 <div className="mt-14 w-11/12 mx-auto max-w-maxContent flex-col items-center justify-between gap-8 first-letter bg-richblack-900 text-white">
                     <InstructorSection />
+
+                    {/* Stats Section */}
+                    <div className="mt-16 mb-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {[
+                            { value: "5K+", label: "Active Learners", color: "text-yellow-50" },
+                            { value: "200+", label: "Expert Courses", color: "text-caribbeangreen-100" },
+                            { value: "150+", label: "Top Instructors", color: "text-blue-100" },
+                            { value: "98%", label: "Satisfaction Rate", color: "text-pink-200" },
+                        ].map((stat, i) => (
+                            <motion.div
+                                key={i}
+                                variants={fadeIn("up", 0.1 * i)}
+                                initial="hidden"
+                                whileInView="show"
+                                viewport={{ once: true, amount: 0.3 }}
+                                className="stat-card"
+                            >
+                                <p className={`text-3xl font-bold ${stat.color}`}>{stat.value}</p>
+                                <p className="text-richblack-300 text-sm mt-1">{stat.label}</p>
+                            </motion.div>
+                        ))}
+                    </div>
 
                     {/* Reviws from Other Learner */}
                     <h1 className="text-center text-3xl lg:text-4xl font-semibold mt-8 flex justify-center items-center gap-x-3">

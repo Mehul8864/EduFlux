@@ -11,7 +11,7 @@ const mailSender = async (email, title, body) => {
         });
 
         let info = await transporter?.sendMail({
-            from: "StudyNotion || Best E-Learning Platform - by Ankur Sharma",
+            from: "EduFlux || Best E-Learning Platform - by Mehul Gupta",
             to: `${email}`,
             subject: `${title}`,
             html: `${body}`,

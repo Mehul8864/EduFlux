@@ -1,6 +1,6 @@
 // controllers/ratingController.js
 
-const RatingAndReview = require("../models/RatingAndReview");
+const RatingAndReview = require("../models/RatingAndRaview");
 const Course = require("../models/Course");
 const mongoose = require("mongoose");
 
@@ -71,7 +71,7 @@ exports.createRating = async (req, res) => {
 
     // compute aggregate stats for this course (avg & count)
     const stats = await RatingAndReview.aggregate([
-      { $match: { course: mongoose.Types.ObjectId(courseId) } },
+      { $match: { course: new mongoose.Types.ObjectId(courseId) } },
       {
         $group: {
           _id: null,
@@ -124,7 +124,7 @@ exports.getAverageRating = async (req, res) => {
     }
 
     const result = await RatingAndReview.aggregate([
-      { $match: { course: mongoose.Types.ObjectId(courseId) } },
+      { $match: { course: new mongoose.Types.ObjectId(courseId) } },
       {
         $group: {
           _id: null,

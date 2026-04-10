@@ -1,7 +1,7 @@
 import React from "react";
 import { FooterLink2 } from "../../data/footer-links";
 import { Link } from "react-router-dom";
-import { ImGithub, ImLinkedin2, ImTwitter } from "react-icons/im";
+import { ImGithub, ImLinkedin2 } from "react-icons/im";
 
 // Images
 import StudyNotionLogo from "../../assets/Logo/Logo-Full-Light.png";
@@ -275,19 +275,19 @@ const Footer = () => {
                         <div className="flex ">
                             <span> Made with ❤️ </span>{" "}
                             <Link
-                                to="https://github.com/Ankur-Sh"
+                                to="https://github.com/Mehul8864"
                                 target="__blank"
                                 className="text-white hover:underline mr-1"
                             >
-                                Ankur Sharma
+                                Mehul Gupta
                             </Link>
                         </div>
-                        <span> © 2024 Studynotion</span>
+                        <span> © 2025 EduFlux</span>
                     </div>
 
                     <div className="flex items-center">
                         <a
-                            href="https://www.linkedin.com/in/ankur-sharma-as/"
+                            href="https://www.linkedin.com/in/mehul-gupta-b38a2b330/"
                             className="text-white p-3 hover:bg-richblack-700 rounded-full duration-300"
                             target="_blank"
                             rel="noopener noreferrer"
@@ -295,20 +295,12 @@ const Footer = () => {
                             <ImLinkedin2 size={17} />
                         </a>
                         <a
-                            href="https://www.github.com/Ankur-Sh"
+                            href="https://www.github.com/Mehul8864"
                             className="text-white p-3 hover:bg-richblack-700 rounded-full duration-300"
                             target="_blank"
                             rel="noopener noreferrer"
                         >
                             <ImGithub size={17} />
-                        </a>
-                        <a
-                            href="https://twitter.com/AnkurSh0403"
-                            className="text-white p-3 hover:bg-richblack-700 rounded-full duration-300"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <ImTwitter size={17} />
                         </a>
                     </div>
                 </div>

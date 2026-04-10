@@ -8,7 +8,7 @@ function Template({ title, description1, description2, image, formType }) {
   return (
     <div className="grid min-h-[calc(100vh-3.5rem)] place-items-center">
       <div className="mx-auto flex w-11/12 max-w-maxContent flex-col-reverse justify-between gap-y-12 py-12 md:flex-row md:gap-y-0 md:gap-x-12">
-        <div className="mx-auto w-11/12 max-w-[450px] md:mx-0">
+        <div className="mx-auto w-11/12 max-w-[450px] md:mx-0 glass-card p-8">
           <h1 className="text-[1.875rem] font-semibold leading-[2.375rem] text-richblack-5">
             {title}
           </h1>
@@ -23,7 +23,7 @@ function Template({ title, description1, description2, image, formType }) {
         </div>
 
 
-        <div className="relative max-w-[550px] md:mx-0 my-0">
+        <div className="relative max-w-[550px] md:mx-0 my-0 float-anim">
           <Img
             src={image}
             alt={formType}
